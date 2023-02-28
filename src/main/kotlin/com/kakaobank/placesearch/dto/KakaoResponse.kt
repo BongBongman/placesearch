@@ -1,7 +1,7 @@
-package com.kakaobank.placesearch.api.dto
+package com.kakaobank.placesearch.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-class KakaoResult(val documents: List<KakaoPlace>)
+class KakaoResponse(val documents: List<KakaoPlace>)
 
 class KakaoPlace(@JsonProperty("place_name") val placeName: String)

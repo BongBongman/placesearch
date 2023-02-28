@@ -1,7 +1,7 @@
-package com.kakaobank.placesearch.api.dto
+package com.kakaobank.placesearch.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-class NaverResult(val items: List<NaverPlace>)
+class NaverResponse(val items: List<NaverPlace>)
 
 class NaverPlace(@JsonProperty("title") val placeName: String)

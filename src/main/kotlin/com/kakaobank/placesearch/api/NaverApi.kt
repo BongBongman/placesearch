@@ -1,15 +1,17 @@
 package com.kakaobank.placesearch.api
 
-import com.kakaobank.placesearch.api.dto.NaverResult
+import com.kakaobank.placesearch.dto.NaverResponse
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToFlux
-import reactor.core.publisher.Flux
+import org.springframework.web.reactive.function.client.bodyToMono
+import reactor.core.publisher.Mono
 
 @Component
 class NaverApi : PlaceApi {
+    override fun priority() = 10
+
     //TODO API KEY property로 옮길 것
-    override fun search(keyword: String): Flux<String> {
+    override fun search(keyword: String, page:Int): Mono<List<String>> {
         return WebClient
             .create("https://openapi.naver.com")
             .get()
@@ -24,9 +26,9 @@ class NaverApi : PlaceApi {
                 it.add("X-Naver-Client-Secret", "7yCeTPJvfy")
             }
             .retrieve()
-            .bodyToFlux<NaverResult>()
-            .flatMap { Flux.fromIterable(it.items) }
-            .map { it.placeName }
+            .bodyToMono<NaverResponse>()
+            .map { it.items }
+            .map { it.map { item -> item.placeName } }
 
     }
 }
