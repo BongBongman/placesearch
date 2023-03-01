@@ -1,0 +1,8 @@
+GET http://localhost:8080/v1/place?keyword=은행
+###
+
+GET http://localhost:8080/v1/keywords
+###
+
+GET http://localhost:8080/hello
+###

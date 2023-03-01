@@ -1,17 +1,22 @@
 package com.kakaobank.placesearch.api
 
 import com.kakaobank.placesearch.dto.NaverResponse
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
 
 @Component
-class NaverApi : PlaceApi {
+class NaverApi(
+    @Value("\${naver.api.clientid}")
+    private val apiClientId: String,
+    @Value("\${naver.api.secret}")
+    private val apiSecret: String
+) : PlaceApi {
     override fun priority() = 10
 
-    //TODO API KEY property로 옮길 것
-    override fun search(keyword: String, page:Int): Mono<List<String>> {
+    override fun search(keyword: String, page: Int): Mono<List<String>> {
         return WebClient
             .create("https://openapi.naver.com")
             .get()
@@ -22,13 +27,12 @@ class NaverApi : PlaceApi {
                     .build()
             }
             .headers {
-                it.add("X-Naver-Client-Id", "Z1hZm9s4K0BKKeFDQ313")
-                it.add("X-Naver-Client-Secret", "7yCeTPJvfy")
+                it.add("X-Naver-Client-Id", apiClientId)
+                it.add("X-Naver-Client-Secret", apiSecret)
             }
             .retrieve()
             .bodyToMono<NaverResponse>()
             .map { it.items }
             .map { it.map { item -> item.placeName } }
-
     }
 }

@@ -17,7 +17,7 @@ class SearchCountAspect(private val searchCountRepository: SearchCountRepository
     }
 
     @AfterReturning(pointcut = "search(keyword)")
-    @Transactional
+    @Transactional //TODO 이게 효과가 있는 것인지 확인 필요
     fun countSearch(keyword: String) {
         searchCountRepository.findByKeyword(keyword)
             .map { it.copy(count = it.count + 1) }
