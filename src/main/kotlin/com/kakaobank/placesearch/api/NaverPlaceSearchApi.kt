@@ -8,15 +8,15 @@ import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
 
 @Component
-class NaverApi(
+class NaverPlaceSearchApi(
     @Value("\${naver.api.clientid}")
     private val apiClientId: String,
     @Value("\${naver.api.secret}")
     private val apiSecret: String
-) : PlaceApi {
+) : PlaceSearchApi {
     override fun priority() = 10
 
-    override fun search(keyword: String, page: Int): Mono<List<String>> {
+    override fun search(keyword: String): Mono<List<String>> {
         return WebClient
             .create("https://openapi.naver.com")
             .get()

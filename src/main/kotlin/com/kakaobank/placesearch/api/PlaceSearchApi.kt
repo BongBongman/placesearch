@@ -2,7 +2,7 @@ package com.kakaobank.placesearch.api
 
 import reactor.core.publisher.Mono
 
-interface PlaceApi {
+interface PlaceSearchApi {
     fun priority(): Int
-    fun search(keyword: String, page:Int): Mono<List<String>>
+    fun search(keyword: String): Mono<List<String>>
 }

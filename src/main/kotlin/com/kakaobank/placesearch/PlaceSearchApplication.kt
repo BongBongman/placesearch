@@ -6,12 +6,14 @@ import org.springframework.boot.WebApplicationType
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.boot.runApplication
+import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.EnableAspectJAutoProxy
 import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories
 
 @SpringBootApplication
 @EnableAspectJAutoProxy
 @EnableR2dbcRepositories
+@EnableCaching
 @EntityScan("com.kakaobank.placesearch.domain")
 class PlaceSearchApplication
 

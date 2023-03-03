@@ -8,13 +8,13 @@ import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
 
 @Component
-class KakaoApi(
+class KakaoPlaceSearchApi(
     @Value("\${kakao.api.key}")
     private val apiKey: String
-) : PlaceApi {
+) : PlaceSearchApi {
     override fun priority() = 20
 
-    override fun search(keyword: String, page: Int): Mono<List<String>> {
+    override fun search(keyword: String): Mono<List<String>> {
         return WebClient
             .create("https://dapi.kakao.com")
             .get()
@@ -22,7 +22,6 @@ class KakaoApi(
                 it.path("/v2/local/search/keyword.JSON")
                     .queryParam("query", keyword)
                     .queryParam("size", 5)
-                    .queryParam("page", page)
                     .build()
             }
             .headers { it.add("Authorization", "KakaoAK $apiKey") }
