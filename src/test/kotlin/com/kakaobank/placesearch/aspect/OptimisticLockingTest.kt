@@ -21,10 +21,10 @@ class OptimisticLockingTest {
     @Test
     fun `OptimisticLockingFailureException should be thrown`() {
         val keyword = "test"
-        val first = searchCountRepository.save(SearchCount(keyword = keyword, count = 0)).block()!!
-        val second = searchCountRepository.findById(first.id!!).block()!!
-        searchCountRepository.save(first.copy(count = 10)).block()
-        searchCountRepository.save(second.copy(count = 11)).block()
+        val first = searchCountRepository.save(SearchCount(keyword = keyword, count = 0)).block()!! // Initially insert row. version is set to 0.
+        val second = searchCountRepository.findById(first.id!!).block()!! // Load the just inserted row. version is still 0.
+        searchCountRepository.save(first.copy(count = 10)).block() // Update the row with version = 0.Set the lastname and bump version to 1.
+        searchCountRepository.save(second.copy(count = 11)).block() // Try to update the previously loaded row that still has version = 0.The operation fails with an OptimisticLockingFailureException, as the current version is 1.
     }
     */
 }

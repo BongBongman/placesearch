@@ -1,0 +1,36 @@
+#h2 console
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  #r2dbc
+  r2dbc:
+    url: r2dbc:h2:file:///./db/place_search
+    username: sa
+    password:
+    pool:
+      initial-size: 10
+      max-size: 20
+  data.r2dbc.repositories.enabled: true
+#api
+kakao.api.key: 870184a00c3c8c365e827b1d84559c0f
+naver.api:
+  clientid: Z1hZm9s4K0BKKeFDQ313
+  secret: 7yCeTPJvfy
+
+#circuit breaker
+management.health.circuitbreakers.enabled: true
+management.endpoint.health.show-details: always
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+    instances:
+      search:
+        baseConfig: default
+        failureRateThreshold: 30
+        minimumNumberOfCalls: 10
+        waitDurationInOpenState: 60s
+        permittedNumberOfCallsInHalfOpenState: 3

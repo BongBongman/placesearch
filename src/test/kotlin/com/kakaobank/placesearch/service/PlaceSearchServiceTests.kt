@@ -2,6 +2,7 @@ import com.kakaobank.placesearch.api.PlaceSearchApi
 import com.kakaobank.placesearch.domain.SearchCount
 import com.kakaobank.placesearch.domain.SearchCountRepository
 import com.kakaobank.placesearch.dto.SearchCountDto
+import com.kakaobank.placesearch.notification.EmergencyNotification
 import com.kakaobank.placesearch.service.PlaceSearchService
 import com.kakaobank.placesearch.service.ReactivePlaceSearchService
 import org.junit.jupiter.api.Assertions.*
@@ -29,13 +30,16 @@ class PlaceSearchServiceTests {
     @Mock
     lateinit var searchCountRepository: SearchCountRepository
 
+    @Mock
+    lateinit var emergencyNotification: EmergencyNotification
+
     lateinit var placeSearchService: PlaceSearchService
 
     @BeforeEach
     fun setUp() {
         openMocks(this)
         placeSearchApis = listOf(firstPlaceSearchApi, secondPlaceSearchApi)
-        placeSearchService = ReactivePlaceSearchService(placeSearchApis, searchCountRepository)
+        placeSearchService = ReactivePlaceSearchService(placeSearchApis, searchCountRepository, emergencyNotification)
     }
 
     @Test
