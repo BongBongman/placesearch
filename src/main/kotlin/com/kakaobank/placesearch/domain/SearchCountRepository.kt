@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono
 
 @Repository
 interface SearchCountRepository : ReactiveCrudRepository<SearchCount, String> {
-    fun findByKeyword(keyword:String): Mono<SearchCount>
-
+    fun findByKeyword(keyword: String): Mono<SearchCount>
+    fun findById(id: Long): Mono<SearchCount>
     fun findFirst10ByOrderByCountDesc(): Flux<SearchCount>
 }

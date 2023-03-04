@@ -1,0 +1,3 @@
+[submodule "redis-reactive-cache"]
+	path = redis-reactive-cache
+	url = https://github.com/Bryksin/redis-reactive-cache.git

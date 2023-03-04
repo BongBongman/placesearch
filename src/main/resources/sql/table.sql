@@ -1,6 +1,7 @@
 CREATE TABLE search_count
 (
-    id INTEGER NOT NULL AUTO_INCREMENT,
-    keyword VARCHAR(255) PRIMARY KEY,
-    count   INT
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    keyword VARCHAR(255),
+    count   BIGINT,
+    version BIGINT
 );

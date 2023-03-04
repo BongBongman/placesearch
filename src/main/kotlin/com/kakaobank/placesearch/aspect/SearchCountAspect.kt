@@ -2,27 +2,37 @@ package com.kakaobank.placesearch.aspect
 
 import com.kakaobank.placesearch.domain.SearchCount
 import com.kakaobank.placesearch.domain.SearchCountRepository
-import org.aspectj.lang.annotation.AfterReturning
+import com.kakaobank.placesearch.log
+import org.aspectj.lang.ProceedingJoinPoint
+import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
-import org.aspectj.lang.annotation.Pointcut
+import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.util.function.*
+import java.util.*
 
 @Component
 @Aspect
-class SearchCountAspect(private val searchCountRepository: SearchCountRepository) {
-    @Pointcut("execution(* com.kakaobank.placesearch.service.PlaceSearchService.search(..)) && args(keyword)")
-    fun search(keyword: String) {
+class SearchCountAspect(
+    private val searchCountRepository: SearchCountRepository
+) {
+    @Around("execution(* com.kakaobank.placesearch.service.PlaceSearchService.search(..)) && args(keyword)")
+    @Transactional
+    fun countKeyword(pjp: ProceedingJoinPoint, keyword: String): Mono<Any?> {
+        return (pjp.proceed() as Mono<*>).zipWith(countKeyword(keyword)).map { (result, _) -> result }
     }
 
-    @AfterReturning(pointcut = "search(keyword)")
-    @Transactional //TODO 이게 효과가 있는 것인지 확인 필요
-    fun countSearch(keyword: String) {
-        searchCountRepository.findByKeyword(keyword)
+    private fun countKeyword(keyword: String): Mono<SearchCount> {
+        return searchCountRepository.findByKeyword(keyword)
+            .switchIfEmpty(Mono.just(SearchCount(keyword = keyword, count = 1)))
             .map { it.copy(count = it.count + 1) }
-            .switchIfEmpty(Mono.just(SearchCount(keyword, 1)))
             .flatMap { searchCountRepository.save(it) }
-            .subscribe()
+            .onErrorResume(OptimisticLockingFailureException::class.java) {
+                log().warn("[${this::class.simpleName}] Optimistic lock failed. ${it.message}")
+                countKeyword(keyword)
+            }
+            .doOnError { log().error("[${this::class.simpleName}] Failed to update count. ${it.message}") }
     }
 }

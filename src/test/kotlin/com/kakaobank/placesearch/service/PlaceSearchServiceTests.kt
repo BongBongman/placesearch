@@ -3,6 +3,7 @@ import com.kakaobank.placesearch.domain.SearchCount
 import com.kakaobank.placesearch.domain.SearchCountRepository
 import com.kakaobank.placesearch.dto.SearchCountDto
 import com.kakaobank.placesearch.service.PlaceSearchService
+import com.kakaobank.placesearch.service.ReactivePlaceSearchService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -34,7 +35,7 @@ class PlaceSearchServiceTests {
     fun setUp() {
         openMocks(this)
         placeSearchApis = listOf(firstPlaceSearchApi, secondPlaceSearchApi)
-        placeSearchService = PlaceSearchService(placeSearchApis, searchCountRepository)
+        placeSearchService = ReactivePlaceSearchService(placeSearchApis, searchCountRepository)
     }
 
     @Test
@@ -67,34 +68,6 @@ class PlaceSearchServiceTests {
     }
 
     @Test
-    fun `should return cached result for the same keyword`() {
-        // given
-        val keyword = "test"
-        val firstPlaces = (0..4).map { "Test$it" }.toList()
-        val secondPlaces = (3..7).map { "Test$it" }.toList()
-        val firstPlacesReturn = Mono.just(firstPlaces)
-        val secondPlacesReturn = Mono.just(secondPlaces)
-
-        `when`(firstPlaceSearchApi.search(keyword)).thenReturn(firstPlacesReturn)
-        `when`(firstPlaceSearchApi.priority()).thenReturn(20)
-        `when`(secondPlaceSearchApi.search(keyword)).thenReturn(secondPlacesReturn)
-        `when`(firstPlaceSearchApi.priority()).thenReturn(10)
-
-        // when
-        val resultMono1 = placeSearchService.search(keyword)
-        val resultMono2 = placeSearchService.search(keyword)
-
-        // then
-        StepVerifier.create(Flux.zip(resultMono1, resultMono2))
-            .assertNext {
-                assertNotNull(it.t1)
-                assertNotNull(it.t2)
-                assertEquals(it.t1, it.t2)
-            }
-            .verifyComplete()
-    }
-
-    @Test
     fun `should handle errors correctly`() {
         // given
         val keyword = "test"
@@ -112,7 +85,7 @@ class PlaceSearchServiceTests {
     @Test
     fun `should return top 10 searched keywords`() {
         // given
-        val searchCounts = (0..9).map { SearchCount("Test$it", it.toLong()) }.toList()
+        val searchCounts = (0..9).map { SearchCount(keyword = "Test$it", count = it.toLong()) }.toList()
         val expected = searchCounts.map { SearchCountDto.from(it) }
         `when`(searchCountRepository.findFirst10ByOrderByCountDesc()).thenReturn(Flux.fromIterable(searchCounts))
 
@@ -140,6 +113,6 @@ class PlaceSearchServiceTests {
 
         // then
         StepVerifier.create(resultMono)
-            .verifyErrorMatches{error -> error.message == errorMessage}
+            .verifyErrorMatches { error -> error.message == errorMessage }
     }
 }
