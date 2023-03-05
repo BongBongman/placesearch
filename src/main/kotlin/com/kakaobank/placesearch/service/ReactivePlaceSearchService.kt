@@ -5,7 +5,7 @@ import com.kakaobank.placesearch.configuration.*
 import com.kakaobank.placesearch.domain.SearchCountRepository
 import com.kakaobank.placesearch.dto.SearchCountDto
 import com.kakaobank.placesearch.log
-import com.kakaobank.placesearch.notification.EmergencyNotification
+import com.kakaobank.placesearch.notification.EmergencyNotificationService
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
@@ -23,7 +23,7 @@ private const val CIRCUIT_BREAKER_KEYWORDS = "keywords"
 class ReactivePlaceSearchService(
     private val placeSearchApis: List<PlaceSearchApi>,
     private val searchCountRepository: SearchCountRepository,
-    private val emergencyNotification: EmergencyNotification
+    private val emergencyNotificationService: EmergencyNotificationService
 ) : PlaceSearchService {
     @CircuitBreaker(name = CIRCUIT_BREAKER_SEARCH, fallbackMethod = "searchFallback")
     @Cacheable(CACHE_SEARCH, key = "#keyword")
@@ -69,7 +69,7 @@ class ReactivePlaceSearchService(
     private fun searchFallback(keyword: String, err: Exception): Mono<List<String>> {
         val message = "[${this::class.simpleName}#search()] Circuit breaker opend : ${err.message}"
         log().error(message)
-        emergencyNotification.sendSlack(message)
+        emergencyNotificationService.sendSlack(message)
         return Mono.error(err) // or return snapshot
     }
 
@@ -86,7 +86,7 @@ class ReactivePlaceSearchService(
     private fun keywordFallback(err: Exception): Mono<List<String>> {
         val message = "[${this::class.simpleName}#search()] Circuit breaker opend : ${err.message}"
         log().error(message)
-        emergencyNotification.sendSlack(message)
+        emergencyNotificationService.sendSlack(message)
         return Mono.error(err) // or return snapshot
     }
 }
