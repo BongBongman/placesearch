@@ -5,7 +5,7 @@ requests 폴더 참고
 - - -
 ### Library
 #### webflux
-비동기적인 HTTP request 처리를 위해 사용했습니다.
+시스템을 비동기로만들기 위해 사용했습니다.
 
 #### reactor
 Reactive 방식을 쓰기 위해 사용했습니다.
