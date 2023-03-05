@@ -72,7 +72,7 @@ class ReactivePlaceSearchService(
         return Mono.error(err) // or return snapshot
     }
 
-    @CircuitBreaker(name = CIRCUIT_BREAKER_KEYWORDS, fallbackMethod = "keywordFallback")
+    @CircuitBreaker(name = CIRCUIT_BREAKER_KEYWORDS, fallbackMethod = "keywordsFallback")
     @Cacheable(CACHE_KEYWORDS)
     override fun keywords(): Mono<List<SearchCountDto>> {
         return searchCountRepository.findFirst10ByOrderByCountDesc()
@@ -82,7 +82,7 @@ class ReactivePlaceSearchService(
             .cache(getMonoCacheExpireTime())
     }
 
-    private fun keywordFallback(err: Exception): Mono<List<String>> {
+    private fun keywordsFallback(err: Exception): Mono<List<String>> {
         val message = "[${this::class.simpleName}#search()] Circuit breaker opend : ${err.message}"
         log().error(message)
         emergencyNotificationService.sendSlack(message)
