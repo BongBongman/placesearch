@@ -2,7 +2,7 @@ import com.kakaobank.placesearch.api.PlaceSearchApi
 import com.kakaobank.placesearch.domain.SearchCount
 import com.kakaobank.placesearch.domain.SearchCountRepository
 import com.kakaobank.placesearch.dto.SearchCountDto
-import com.kakaobank.placesearch.notification.EmergencyNotificationService
+import com.kakaobank.placesearch.service.EmergencyNotificationService
 import com.kakaobank.placesearch.service.PlaceSearchService
 import com.kakaobank.placesearch.service.ReactivePlaceSearchService
 import org.junit.jupiter.api.Assertions.*

@@ -5,7 +5,6 @@ import com.kakaobank.placesearch.configuration.*
 import com.kakaobank.placesearch.domain.SearchCountRepository
 import com.kakaobank.placesearch.dto.SearchCountDto
 import com.kakaobank.placesearch.log
-import com.kakaobank.placesearch.notification.EmergencyNotificationService
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service

@@ -1,4 +1,4 @@
-package com.kakaobank.placesearch.notification
+package com.kakaobank.placesearch.service
 
 import com.kakaobank.placesearch.log
 import org.springframework.stereotype.Component
