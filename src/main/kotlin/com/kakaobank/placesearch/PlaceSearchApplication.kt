@@ -13,6 +13,7 @@ import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories
 @SpringBootApplication
 @EnableAspectJAutoProxy
 @EnableR2dbcRepositories
+@EnableCaching
 class PlaceSearchApplication
 
 fun main(args: Array<String>) {

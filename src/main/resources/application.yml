@@ -1,10 +1,10 @@
-#h2 console
 spring:
+#h2 console
   h2:
     console:
       enabled: true
       path: /h2-console
-  #r2dbc
+#r2dbc
   r2dbc:
     url: r2dbc:h2:file:///./db/place_search
     username: sa
@@ -29,6 +29,12 @@ resilience4j:
         registerHealthIndicator: true
     instances:
       search:
+        baseConfig: default
+        failureRateThreshold: 30
+        minimumNumberOfCalls: 10
+        waitDurationInOpenState: 60s
+        permittedNumberOfCallsInHalfOpenState: 3
+      keywords:
         baseConfig: default
         failureRateThreshold: 30
         minimumNumberOfCalls: 10

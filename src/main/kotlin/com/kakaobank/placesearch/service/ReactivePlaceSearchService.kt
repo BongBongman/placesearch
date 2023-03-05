@@ -1,12 +1,13 @@
 package com.kakaobank.placesearch.service
 
 import com.kakaobank.placesearch.api.PlaceSearchApi
+import com.kakaobank.placesearch.configuration.*
 import com.kakaobank.placesearch.domain.SearchCountRepository
 import com.kakaobank.placesearch.dto.SearchCountDto
 import com.kakaobank.placesearch.log
 import com.kakaobank.placesearch.notification.EmergencyNotification
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
-import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -15,7 +16,8 @@ import reactor.kotlin.core.util.function.component2
 import java.time.Duration
 
 private const val TARGET_RESULT = 10
-private const val CIRCUIT_BREAKER_NAME = "search"
+private const val CIRCUIT_BREAKER_SEARCH = "search"
+private const val CIRCUIT_BREAKER_KEYWORDS = "keywords"
 
 @Service
 class ReactivePlaceSearchService(
@@ -23,20 +25,21 @@ class ReactivePlaceSearchService(
     private val searchCountRepository: SearchCountRepository,
     private val emergencyNotification: EmergencyNotification
 ) : PlaceSearchService {
-    @CircuitBreaker(name = CIRCUIT_BREAKER_NAME, fallbackMethod = "fallback")
+    @CircuitBreaker(name = CIRCUIT_BREAKER_SEARCH, fallbackMethod = "searchFallback")
+    @Cacheable(CACHE_SEARCH, key = "#keyword")
     override fun search(keyword: String): Mono<List<String>> {
         return searchWithPriority(keyword)
             .map { places ->
                 places.sortedWith(
                     Comparator.comparingInt<PlaceWithPriority> { it.duplicationPriority }
+                        .thenComparingInt { it.apiPriority }
+                        .thenByDescending { it.indexPriority }
                         .reversed()
-                        .thenByDescending { it.apiPriority }
-                        .thenComparingInt { it.indexPriority }
                 ).map { it.placeName }
             }
             .map { if (it.size <= TARGET_RESULT) it else it.subList(0, TARGET_RESULT + 1) }
             .doOnError { log().error("[${this::class.simpleName}] Failed to search() : ${it.message}") }
-            .cache(Duration.ofDays(1))
+            .cache(getMonoCacheExpireTime())
     }
 
     private fun searchWithPriority(keyword: String): Mono<List<PlaceWithPriority>> {
@@ -60,18 +63,31 @@ class ReactivePlaceSearchService(
         return picked.copy(duplicationPriority = old.duplicationPriority + 1)
     }
 
-    private fun fallback(keyword: String, err: Exception): Mono<List<String>> {
-        val message = "[${this::class.simpleName}] Circuit breaker opend : ${err.message}"
+    private fun getMonoCacheExpireTime() = Duration.ofSeconds(CACHE_EXPIRE_TIME_SECONDS * 2)
+
+
+    private fun searchFallback(keyword: String, err: Exception): Mono<List<String>> {
+        val message = "[${this::class.simpleName}#search()] Circuit breaker opend : ${err.message}"
         log().error(message)
         emergencyNotification.sendSlack(message)
-        return Mono.error(err)
+        return Mono.error(err) // or return snapshot
     }
 
+    @CircuitBreaker(name = CIRCUIT_BREAKER_KEYWORDS, fallbackMethod = "keywordFallback")
+    @Cacheable(CACHE_KEYWORDS)
     override fun keywords(): Mono<List<SearchCountDto>> {
         return searchCountRepository.findFirst10ByOrderByCountDesc()
             .map { SearchCountDto.from(it) }
             .collectList()
             .doOnError { log().error("[${this::class.simpleName}] Failed to keywords() : ${it.message}") }
+            .cache(getMonoCacheExpireTime())
+    }
+
+    private fun keywordFallback(err: Exception): Mono<List<String>> {
+        val message = "[${this::class.simpleName}#search()] Circuit breaker opend : ${err.message}"
+        log().error(message)
+        emergencyNotification.sendSlack(message)
+        return Mono.error(err) // or return snapshot
     }
 }
 

@@ -1,6 +1,7 @@
 package com.kakaobank.placesearch.api
 
 import com.kakaobank.placesearch.dto.KakaoResponse
+import com.kakaobank.placesearch.log
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
@@ -15,6 +16,7 @@ class KakaoPlaceSearchApi(
     override fun priority() = 20
 
     override fun search(keyword: String): Mono<List<String>> {
+        log().info("[${this::class.simpleName}#search()] keyword : $keyword")
         return WebClient
             .create("https://dapi.kakao.com")
             .get()
