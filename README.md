@@ -1,8 +1,8 @@
 # placesearch
-
+- - -
 ### HTTP Request file
 requests 폴더 참고
-
+- - -
 ### Library
 #### webflux
 비동기적인 HTTP request 처리를 위해 사용했습니다.
@@ -18,7 +18,7 @@ Reactive 방식을 쓰기 위해 사용했습니다.
 
 #### resilience4j
 Circuit breaker 지원 목적으로 사용했습니다.
-
+- - -
 ### 부연설명
 1. 유지보수 및 확장에 용이한 아키텍처 설계
    * Clean architecture의 내용을 따르고자 했습니다.
